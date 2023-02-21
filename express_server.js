@@ -7,12 +7,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Route: Homepage - Displays Hello string
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// Route: urls.json - Displays urlDatabase as json string
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+// Route: hello - Displays Hello World using html
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
