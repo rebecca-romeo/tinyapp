@@ -19,6 +19,18 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// Route: urls
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+})
+
+// Route: urls/id
+app.get("/urls/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: req.params.longURL /*  What goes here? */ };
+  res.render("urls_show", templateVars);
+});
+
 // Route: hello - Displays Hello World using html
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
