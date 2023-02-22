@@ -14,16 +14,11 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// Route: urls.json - Displays urlDatabase as json string
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 // Route: urls
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
-})
+});
 
 // Route: urls/id
 app.get("/urls/:id", (req, res) => {
@@ -31,10 +26,16 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Route: urls.json - Displays urlDatabase as json string
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
+
+
 // Route: hello - Displays Hello World using html
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 // ---------------------------------------------
 // Test: variable accessibility between requests
@@ -47,6 +48,7 @@ app.get("/hello", (req, res) => {
 // app.get("/fetch", (req, res) => {
 //   res.send(`a = ${a}`);
 // });
+// did not work in fetch
 // END test --------------------------------------
 
 app.listen(PORT, () => {
