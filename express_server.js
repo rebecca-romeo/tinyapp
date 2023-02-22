@@ -11,8 +11,17 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+function generateRandomString() {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
 
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
 
+  return result;
+}
 
 
 
@@ -42,9 +51,15 @@ app.get("/urls", (req, res) => {
 
 // Route: post urls
 app.post("/urls", (req, res) => {
+  const randomString = generateRandomString();
   console.log(req.body); // Log the POST request body to the console
+  console.log("random shorturl:", randomString)
   res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
+
+
+
+
 
 // Route: urls.json - Displays urlDatabase as json string
 // app.get("/urls.json", (req, res) => {
