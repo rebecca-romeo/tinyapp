@@ -20,6 +20,7 @@
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
+
       <table class="table">
         <thead>
           <tr>
@@ -29,12 +30,16 @@
             <th scope="col">Delete</th>
           </tr>
         </thead>
+
         <tbody>
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
+
+
               <td>
+                <!-- Edit button. User can click this button to be redirected to a page that lets them edit the long url -->
                 <form method="GET" action="/urls/<%= id %>">
                 <button
                   type="submit"
@@ -42,7 +47,9 @@
                   >Edit</button>
                 </form>
               </td>
+
               <td>
+                <!-- Delete button. Deletes the entire row in the table - short, long, edit, and delete all removed for that row -->
                 <form method="POST" action="/urls/<%= id %>/delete">
                   <button
                     type="submit"
@@ -54,7 +61,10 @@
           <% } %>
         </tbody>
       </table>
+
     </main>
+
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

@@ -19,8 +19,10 @@
   </head>
 
   <body>
+    <!-- Header -->
     <%- include('partials/_header') %>
 
+    <!-- Form - user enters and submits a website they want a tinyurl for -->
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
       <form class="form-inline" action="/urls" method="POST">
@@ -37,6 +39,9 @@
         </div>
       </form>
     </main>
+
+
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

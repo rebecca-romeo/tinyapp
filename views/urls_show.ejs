@@ -15,6 +15,7 @@
     <%- include('partials/_header') %>
 
     <div class="card text-center">
+      <!-- Display tinyurl and long url. Shows the user the current value of the longURL and corresponding tiny url for that website -->
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
@@ -24,6 +25,7 @@
       </div>
       <div class="card-footer text-muted"></div>
 
+      <!-- Edit longURL. Includes a form and submit button, the user can type a new long url and hit submit to update/replace the previous website url  -->
       <div style="background-color: rgb(247, 247, 247);">
         <h5 class="card-title" style="color: grey;"> Edit</h5>
         <form action="/urls/<%= id %>" method="POST" >
