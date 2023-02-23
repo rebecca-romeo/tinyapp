@@ -21,7 +21,27 @@
 
 
 
+
   <!--
+  - Conditional to check if the user is logged in or not
+  - if logged in ? display username and logout button : display login form and signin button -->
+  <% if(username){ %>
+    <!-- Display the username -->
+    <div>
+      <p style="padding-right: 15px">Signed in as: <%= username %></p>
+    </div>
+
+    <!-- Logout button -->
+    <form action="/logout" method="POST" >
+
+      <div style="display: flex; justify-content: center; align-items: center;">
+        <label for="username"> </label>
+        <button type="submit" class="btn btn-primary"> Logout</button>
+      </div>
+    </form>
+
+  <% } else{ %>
+      <!--
     - A login form. User enters a username, then submits the login button.
     - Submited information is routed to /login -->
   <form action="/login" method="POST" >
@@ -40,13 +60,12 @@
       <button type="submit" class="btn btn-primary">Sign in</button>
     </div>
   </form>
+  <% } %>
 
-  <!-- Display the username once the user signs in -->
-  <div>
-    <p>Signed in as: </p>
-    <p><%= username %></p>
 
-  </div>
+
+
+
 
 </nav>
 

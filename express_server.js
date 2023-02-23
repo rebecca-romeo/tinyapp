@@ -45,6 +45,13 @@ app.post("/login", (req, res) => {
 });
 
 
+// Route: logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls')
+});
+
+
 // Route: submit url
   // a form (from urls_new ejs)
   // use types a website and hits submit
