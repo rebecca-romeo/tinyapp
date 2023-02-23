@@ -24,7 +24,7 @@ function generateRandomString() {
 }
 
 
-
+// QUESTION: Check if all the routes are in the right order?
 
 // Route: Homepage - Displays Hello string
 app.get("/", (req, res) => {
@@ -32,14 +32,31 @@ app.get("/", (req, res) => {
 });
 
 
-
+// Route: get urls - form
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// Route: post urls - form
+app.post("/urls", (req, res) => {
+  // On post, generate a random string
+  const randomString = generateRandomString();
+
+  console.log(req.body); // Log the POST request body to the console
+  console.log("random shorturl:", randomString)
+
+  // Add the random string to the database as a key, and the value is the longurl that the user submitted
+  urlDatabase[randomString] = req.body.longURL;
+  console.log(urlDatabase)
+
+  // Redirect the user to the urls/:id page
+  res.redirect(`/urls/${randomString}`);
+});
+
+
 // Route: urls/id
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: req.params.longURL /*  What goes here? */ };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
@@ -49,13 +66,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// Route: post urls
-app.post("/urls", (req, res) => {
-  const randomString = generateRandomString();
-  console.log(req.body); // Log the POST request body to the console
-  console.log("random shorturl:", randomString)
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
+
 
 
 
@@ -71,20 +82,6 @@ app.post("/urls", (req, res) => {
 // app.get("/hello", (req, res) => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
 // });
-
-// ---------------------------------------------
-// Test: variable accessibility between requests
-
-// app.get("/set", (req, res) => {
-//   const a = 1;
-//   res.send(`a = ${a}`);
-// });
-
-// app.get("/fetch", (req, res) => {
-//   res.send(`a = ${a}`);
-// });
-// did not work in fetch
-// END test --------------------------------------
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
