@@ -1,5 +1,9 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
+
 const app = express();
+app.use(cookieParser());
+
 const PORT = 3001; // default port 8080
 
 app.set("view engine", "ejs");
@@ -45,7 +49,10 @@ app.post("/login", (req, res) => {
   // a form (from urls_new ejs)
   // use types a website and hits submit
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies['username']
+  }
+  res.render("urls_new", templateVars);
 });
 
 // Route: post submitted url
@@ -76,7 +83,11 @@ app.get("/u/:id", (req, res) => {
   // user can view the short and long url
   // user can make an edit to the long url
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    username: req.cookies["username"],
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -100,7 +111,9 @@ app.post("/urls/:id", (req, res) => {
 
 // Route: urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
