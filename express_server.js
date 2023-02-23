@@ -42,12 +42,8 @@ app.post("/urls", (req, res) => {
   // On post, generate a random string
   const randomString = generateRandomString();
 
-  console.log(req.body); // Log the POST request body to the console
-  console.log("random shorturl:", randomString)
-
   // Add the random string to the database as a key, and the value is the longurl that the user submitted
   urlDatabase[randomString] = req.body.longURL;
-  console.log(urlDatabase)
 
   // Redirect the user to the urls/:id page
   res.redirect(`/urls/${randomString}`);
@@ -69,6 +65,14 @@ app.get("/urls/:id", (req, res) => {
 // Route: delete
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
+  res.redirect('/urls');
+});
+
+// Route: edit
+app.post("/urls/:id", (req, res) => {
+  const shortID = req.params.id;
+  const longURL = req.body.editURL;
+  urlDatabase[shortID] = longURL;
   res.redirect('/urls');
 });
 
