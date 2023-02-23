@@ -31,13 +31,27 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// Route: login
+// user types a username in form (_header.ejs), hits submit.
+// A cookie is create with their login name and value. Once logged in, user is redirected to /urls
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', username)
+  res.redirect('/urls')
+});
 
-// Route: get urls - form
+
+// Route: submit url
+  // a form (from urls_new ejs)
+  // use types a website and hits submit
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// Route: post urls - form
+// Route: post submitted url
+  // after user submits the website, a short url is generated
+  // user is then redirected to urls/tinyurl to see their newly generate tiny url and corresponding long url
+  // (uses longURL / submit button from urls_new ejs)
 app.post("/urls", (req, res) => {
   // On post, generate a random string
   const randomString = generateRandomString();
@@ -49,7 +63,8 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-// Route: short url takes user to the website
+// Route: short url id redirects to long url website
+  // use a tiny url id and brings user to the real website
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
@@ -57,24 +72,30 @@ app.get("/u/:id", (req, res) => {
 
 
 // Route: urls/id
+  // page after the user creates a tiny url
+  // user can view the short and long url
+  // user can make an edit to the long url
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
-// Route: delete
+// Route: delete row
+  //user clicks delete button, deletes the entire line of short and long url that was saved (button in urls_index)
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
 
-// Route: edit
+// Route: edit longurl
+  //takes the longurl the user submit and replaces the original url (form in urls_show ejs)
 app.post("/urls/:id", (req, res) => {
   const shortID = req.params.id;
   const longURL = req.body.editURL;
   urlDatabase[shortID] = longURL;
   res.redirect('/urls');
 });
+
 
 
 // Route: urls

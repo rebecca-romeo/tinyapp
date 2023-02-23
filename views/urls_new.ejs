@@ -22,7 +22,10 @@
     <!-- Header -->
     <%- include('partials/_header') %>
 
-    <!-- Form - user enters and submits a website they want a tinyurl for -->
+    <!--
+      - Form on route urls/new
+      - user enters and submits a website they want a tinyurl for.
+      - Once submitted, user is directed to urls/id -->
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
       <form class="form-inline" action="/urls" method="POST">
