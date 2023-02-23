@@ -53,6 +53,12 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
+// Route: short url takes user to the website
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
 
 // Route: urls/id
 app.get("/urls/:id", (req, res) => {
