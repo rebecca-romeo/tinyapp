@@ -25,10 +25,10 @@
   <!--
   - Conditional to check if the user is logged in or not
   - if logged in ? display username and logout button : display login form and signin button -->
-  <% if(username){ %>
+  <% if(user){ %>
     <!-- Display the username -->
     <div>
-      <p style="padding-right: 15px">Signed in as: <%= username %></p>
+      <p style="padding-right: 15px">Signed in as: <%= user["email"] %></p>
     </div>
 
     <!-- Logout button -->
