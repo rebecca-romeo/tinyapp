@@ -181,10 +181,13 @@ app.post("/logout", (req, res) => {
 // use types a website and hits submit
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    // *****************
     user: users[req.cookies['user_id']]
-    // *****************
   };
+
+  if(!templateVars.user) {
+    return res.redirect('/login')
+  }
+
   res.render("urls_new", templateVars);
 });
 
@@ -193,12 +196,19 @@ app.get("/urls/new", (req, res) => {
 // user is then redirected to urls/tinyurl to see their newly generate tiny url and corresponding long url
 // (uses longURL / submit button from urls_new ejs)
 app.post("/urls", (req, res) => {
+
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+
+  if(!user) {
+    return res.status(403).send("You must be logged in to view this page")
+  }
+
   // On post, generate a random string
   const randomString = generateRandomString();
 
   // Add the random string to the database as a key, and the value is the longurl that the user submitted
   urlDatabase[randomString] = req.body.longURL;
-
 
   // Redirect the user to the urls/:id page
   res.redirect(`/urls/${randomString}`);
@@ -207,8 +217,14 @@ app.post("/urls", (req, res) => {
 // Route: short url id redirects to long url website
 // use a tiny url id and brings user to the real website
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
+
+  if (!longURL) {
+    res.status(404).send("That shortened URL does not exist. Please try again.");
+  } else {
+    res.redirect(longURL);
+  }
 });
 
 
@@ -247,9 +263,13 @@ app.post("/urls/:id", (req, res) => {
 // Route: urls
 app.get("/urls", (req, res) => {
   const templateVars = {
-// *****************
     user: users[req.cookies['user_id']],
     urls: urlDatabase };
+
+
+  if(!templateVars.user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
+  }
 
 
   res.render("urls_index", templateVars);
