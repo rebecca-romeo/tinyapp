@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 // *************************
-// DATABASES
+///////// DATABASES
 // *************************
 // Users database
 const users = {
@@ -33,7 +33,7 @@ const urlDatabase = {
 };
 
 // *************************
-// FUNCTIONS
+///////// FUNCTIONS
 // *************************
 const getUserByEmail = function(email) {
   const userValues = Object.values(users);
@@ -58,17 +58,22 @@ function generateRandomString() {
 
 
 // *************************
-// ROUTES
+////////// ROUTES
 // *************************
 
 // QUESTION: Check if all the routes are in the right order?
 
+
+// homepage
+// *************************
 // Route: Homepage - Displays Hello string
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// Route: register
+// register
+// *************************
+// Route: get register
 app.get('/register', (req, res) => {
   const templateVars = {
     user: users[req.cookies['user_id']]
@@ -76,14 +81,12 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
-// Route: register
+// Route: post register
 app.post("/register", (req, res) => {
   // create a random id
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-
-
 
     console.log(users);
   // create a cookie with the user's id
@@ -108,23 +111,60 @@ app.post("/register", (req, res) => {
 });
 
 
-
+// login
+// *************************
 // Route: login
 // user types a username in form (_header.ejs), hits submit.
+
 // A cookie is create with their login name and value. Once logged in, user is redirected to /urls
+
+// Route:  get login
+app.get("/login", (req, res) => {
+
+  // maybe take user out of tempvar
+  // const templateVars = {
+  //   user: users[req.cookies['user_id']]
+  // }
+
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+
+  if(user) {
+    return res.redirect('/urls');
+  }
+
+  res.render('login', {user: null});
+});
+
+
+// Route: post login
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = getUserByEmail(email);
+
+  if(!user) {
+    return res.status(403).send("This email was not found. Please try signing in again or register instead.")
+  }
+  if(password !== user.password) {
+    return res.status(403).send("Incorrect password. Please try again")
+  }
+
+
+  // const userId = req.cookies.user_id;
+  res.cookie('user_id', user.id);
   res.redirect('/urls');
 });
 
 
-// Route: logout
+// Route: post logout
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
+// urls
+// *************************
 
 // Route: submit url
 // a form (from urls_new ejs)
@@ -200,6 +240,8 @@ app.get("/urls", (req, res) => {
 // *****************
     user: users[req.cookies['user_id']],
     urls: urlDatabase };
+
+
   res.render("urls_index", templateVars);
 });
 

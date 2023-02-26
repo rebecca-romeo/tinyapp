@@ -41,25 +41,10 @@
     </form>
 
   <% } else{ %>
-      <!--
-    - A login form. User enters a username, then submits the login button.
-    - Submited information is routed to /login -->
-  <form action="/login" method="POST" >
 
-    <div style="display: flex; justify-content: center; align-items: center;">
+    <a href="/login" class="btn btn-primary" style="margin-right: 10px">Login</a>
+    <a href="/register" class="btn btn-primary";">Register</a>
 
-      <!-- Note: should include sr only and content inside the label ie enter username -->
-      <label for="username"> </label>
-      <input
-        class="form-control"
-        type="text"
-        name="username"
-        placeholder="Enter a username"
-        style="width: 300px; margin: 1em"
-      />
-      <button type="submit" class="btn btn-primary">Sign in</button>
-    </div>
-  </form>
   <% } %>
 
 
