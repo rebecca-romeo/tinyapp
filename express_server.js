@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 const app = express();
 app.use(cookieParser());
@@ -13,16 +14,22 @@ app.use(express.urlencoded({ extended: true }));
 ///////// DATABASES
 // *************************
 // Users database
+
+// const plainpw = "dishwasher-funk";
+// const salt = bcrypt.genSaltSync(10);
+// const hash = bcrypt.hashSync(plainpw, salt);
+// console.log(hash)
+
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "$2a$10$LkYyf7ztCYVaOLY1E4NLO.NZp.GHK66tjRiVU6gAawrneD8MRcZsO",
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "$2a$10$9PpncpNh6z8sTIIOT6UP0.8msE.M//zO080OoMT6Eqyhoxhip5sdW",
   },
 };
 
@@ -64,15 +71,12 @@ function generateRandomString() {
 // QUESTION: Check if all the routes are in the right order?
 
 
-// homepage
-// *************************
 // Route: Homepage - Displays Hello string
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// register
-// *************************
+
 // Route: get register
 app.get('/register', (req, res) => {
   const templateVars = {
@@ -112,21 +116,19 @@ app.post("/register", (req, res) => {
     users[userId] = {
       id: userId,
       email: email,
-      password: password
+      password: bcrypt.hashSync(password, 10)
     }
+
+    console.log(users)
 
   res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
 
-// login
-// *************************
-// Route: login
+
 // user types a username in form (_header.ejs), hits submit.
-
 // A cookie is create with their login name and value. Once logged in, user is redirected to /urls
-
 // Route:  get login
 app.get("/login", (req, res) => {
 
@@ -156,7 +158,8 @@ app.post("/login", (req, res) => {
   if(!user) {
     return res.status(403).send("This email was not found. Please try signing in again or register instead.")
   }
-  if(password !== user.password) {
+  // if(password !== user.password)
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Incorrect password. Please try again")
   }
 
@@ -173,8 +176,6 @@ app.post("/logout", (req, res) => {
   res.redirect('/login');
 });
 
-// urls
-// *************************
 
 // Route: submit url
 // a form (from urls_new ejs)
@@ -276,15 +277,6 @@ app.get("/urls", (req, res) => {
 });
 
 
-
-
-
-
-
-// Route: urls.json - Displays urlDatabase as json string
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
 
 
 app.listen(PORT, () => {
