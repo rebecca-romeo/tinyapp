@@ -1,9 +1,15 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 
 const app = express();
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['vj43qev', 'rf4343jf3', 'h43fj3kf', '4235qkrf'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 const PORT = 3001; // default port 8080
 
@@ -13,7 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 // *************************
 ///////// DATABASES
 // *************************
-// Users database
 
 // const plainpw = "dishwasher-funk";
 // const salt = bcrypt.genSaltSync(10);
@@ -68,22 +73,18 @@ function generateRandomString() {
 ////////// ROUTES
 // *************************
 
-// QUESTION: Check if all the routes are in the right order?
-
-
-// Route: Homepage - Displays Hello string
+// Route: Homepage
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-
 // Route: get register
 app.get('/register', (req, res) => {
   const templateVars = {
-    user: users[req.cookies['user_id']]
+    user: users[req.session['user_id']]
   }
 
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const user = users[userId];
 
   // if user is logged in and tries going to the register page, redirect them to urls
@@ -100,9 +101,6 @@ app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-
-    console.log(users);
-  // create a cookie with the user's id
 
   if (email === "" || password === "") {
     return res.status(400).send("Please enter your email and a password")
@@ -121,26 +119,20 @@ app.post("/register", (req, res) => {
 
     console.log(users)
 
-  res.cookie('user_id', userId);
+  // res.cookie('user_id', userId);
+  req.session.user_id = userId;
   res.redirect('/urls');
 });
 
-
-
+// Route:  get login
 // user types a username in form (_header.ejs), hits submit.
 // A cookie is create with their login name and value. Once logged in, user is redirected to /urls
-// Route:  get login
 app.get("/login", (req, res) => {
 
-  // maybe take user out of tempvar
-  // const templateVars = {
-  //   user: users[req.cookies['user_id']]
-  // }
-
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const user = users[userId];
 
-    // if user is logged in and tries going to the login page, redirect them to urls
+  // if user is logged in and tries going to the login page, redirect them to urls
   if(user) {
     return res.redirect('/urls');
   }
@@ -163,26 +155,24 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Incorrect password. Please try again")
   }
 
-
-  // const userId = req.cookies.user_id;
-  res.cookie('user_id', user.id);
+  // res.cookie('user_id', user.id);
+  req.session.user_id = user.id;
   res.redirect('/urls');
 });
 
 
 // Route: post logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
 
 // Route: submit url
-// a form (from urls_new ejs)
-// use types a website and hits submit
+// a form (from urls_new ejs). user types a website and hits submit
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.cookies['user_id']]
+    user: users[req.session['user_id']]
   };
 
   if(!templateVars.user) {
@@ -198,7 +188,7 @@ app.get("/urls/new", (req, res) => {
 // (uses longURL / submit button from urls_new ejs)
 app.post("/urls", (req, res) => {
 
-  const userId = req.cookies.user_id;
+  const userId = req.session.user_id;
   const user = users[userId];
 
   if(!user) {
@@ -215,8 +205,8 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-// Route: short url id redirects to long url website
-// use a tiny url id and brings user to the real website
+// Route: short url id
+// use a tiny url id and redirects user to the real website
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -231,13 +221,10 @@ app.get("/u/:id", (req, res) => {
 
 // Route: urls/id
 // page after the user creates a tiny url
-// user can view the short and long url
-// user can make an edit to the long url
+// user can view the short and long url & edit to the long url
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
-    // *****************
-    user: users[req.cookies['user_id']],
-    // *****************
+    user: users[req.session['user_id']],
     id: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -245,7 +232,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 // Route: delete row
-//user clicks delete button, deletes the entire line of short and long url that was saved (button in urls_index)
+// button deletes entire line of short and long url that was saved (button in urls_index)
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
@@ -264,19 +251,15 @@ app.post("/urls/:id", (req, res) => {
 // Route: urls
 app.get("/urls", (req, res) => {
   const templateVars = {
-    user: users[req.cookies['user_id']],
+    user: users[req.session['user_id']],
     urls: urlDatabase };
-
 
   if(!templateVars.user) {
     return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
   }
 
-
   res.render("urls_index", templateVars);
 });
-
-
 
 
 app.listen(PORT, () => {
