@@ -20,11 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 ///////// DATABASES
 // *************************
 
-// const plainpw = "dishwasher-funk";
-// const salt = bcrypt.genSaltSync(10);
-// const hash = bcrypt.hashSync(plainpw, salt);
-// console.log(hash)
-
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -80,6 +75,19 @@ function generateRandomString() {
   return result;
 }
 
+const urlsForUser = function(userId) {
+  const urls = {};
+  const ids = Object.keys(urlDatabase);
+
+  for (const id of ids) {
+    const url = urlDatabase[id]
+    if(url.userId === userId) {
+      urls[id] = url;
+    }
+  }
+  return urls;
+}
+
 
 // *************************
 ////////// ROUTES
@@ -87,7 +95,7 @@ function generateRandomString() {
 
 // Route: Homepage
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.send(`Welcome to TinyApp. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
 });
 
 // Route: get register
@@ -265,13 +273,17 @@ app.post("/urls/:id", (req, res) => {
 
 // Route: urls
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    user: users[req.session['user_id']],
-    urls: urlDatabase };
-
-  if(!templateVars.user) {
+  const user = users[req.session['user_id']];
+  if(!user) {
     return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
   }
+
+  const urls = urlsForUser(user)
+
+  const templateVars = {
+    urls,
+    user
+  };
 
   res.render("urls_index", templateVars);
 });
