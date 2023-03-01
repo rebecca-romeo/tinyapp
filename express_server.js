@@ -39,10 +39,22 @@ const users = {
 };
 
 // Database object
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
+
 
 // *************************
 ///////// FUNCTIONS
@@ -199,7 +211,10 @@ app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
 
   // Add the random string to the database as a key, and the value is the longurl that the user submitted
-  urlDatabase[randomString] = req.body.longURL;
+  urlDatabase[randomString] = {
+    longURL: req.body.longURL,
+    userID: userId
+  };
 
   // Redirect the user to the urls/:id page
   res.redirect(`/urls/${randomString}`);
@@ -209,7 +224,7 @@ app.post("/urls", (req, res) => {
 // use a tiny url id and redirects user to the real website
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
 
   if (!longURL) {
     res.status(404).send("That shortened URL does not exist. Please try again.");
@@ -226,7 +241,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user: users[req.session['user_id']],
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id].longURL
   };
   res.render("urls_show", templateVars);
 });
@@ -243,7 +258,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortID = req.params.id;
   const longURL = req.body.editURL;
-  urlDatabase[shortID] = longURL;
+  urlDatabase[shortID].longURL = longURL;
   res.redirect('/urls');
 });
 
