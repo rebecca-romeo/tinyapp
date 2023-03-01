@@ -1,4 +1,5 @@
 const express = require("express");
+// const { getUserByEmail } = require('./helpers')
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 
@@ -54,14 +55,7 @@ const urlDatabase = {
 // *************************
 ///////// FUNCTIONS
 // *************************
-const getUserByEmail = function(email) {
-  const userValues = Object.values(users);
-  for(const user of userValues) {
-    if(user.email === email) {
-      return user;
-    }
-  }
-};
+
 
 function generateRandomString() {
   let result = '';
@@ -75,13 +69,23 @@ function generateRandomString() {
   return result;
 }
 
+const getUserByEmail = function(email) {
+  const userValues = Object.values(users);
+  for(const user of userValues) {
+    if(user.email === email) {
+      return user;
+    }
+  }
+};
+
+
 const urlsForUser = function(userId) {
   const urls = {};
   const ids = Object.keys(urlDatabase);
 
   for (const id of ids) {
     const url = urlDatabase[id]
-    if(url.userId === userId) {
+    if(url.userID === userId) {
       urls[id] = url;
     }
   }
@@ -246,17 +250,46 @@ app.get("/u/:id", (req, res) => {
 // page after the user creates a tiny url
 // user can view the short and long url & edit to the long url
 app.get("/urls/:id", (req, res) => {
+  const user = users[req.session['user_id']];
+  const id = req.params.id;
+  if(!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
+  }
+
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Invalid tinyURL, please try again. ");
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(403).send("You do not have permission to view this URL.");
+  }
+
   const templateVars = {
-    user: users[req.session['user_id']],
-    id: req.params.id,
+    user: user,
+    id: id,
     longURL: urlDatabase[req.params.id].longURL
   };
   res.render("urls_show", templateVars);
 });
 
-// Route: delete row
-// button deletes entire line of short and long url that was saved (button in urls_index)
+// Route: delete row (button in urls_index)
 app.post("/urls/:id/delete", (req, res) => {
+  const user = users[req.session['user_id']];
+  const id = req.params.id;
+
+  if(!user) {
+    return res.status(403).send(`You must be logged in to delete this url. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+    if (urlDatabase[id].userID !== user.id) {
+      return res.status(403).send("You do not have permission to delete a URL that is not yours.");
+    }
+
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send("Invalid tinyURL, please try again.");
+  }
+
+
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
@@ -264,9 +297,19 @@ app.post("/urls/:id/delete", (req, res) => {
 // Route: edit longurl
 //takes the longurl the user submit and replaces the original url (form in urls_show ejs)
 app.post("/urls/:id", (req, res) => {
+  const user = users[req.session['user_id']];
   const shortID = req.params.id;
   const longURL = req.body.editURL;
-  urlDatabase[shortID].longURL = longURL;
+
+
+  if (urlDatabase[shortID].userID === user.id) {
+    urlDatabase[shortID].longURL = longURL;
+    res.redirect('/urls');
+  } else {
+    // Return an error message if the user does not own the URL
+    res.status(403).send("You do not have permission to edit this URL.");
+  }
+
   res.redirect('/urls');
 });
 
@@ -278,7 +321,8 @@ app.get("/urls", (req, res) => {
     return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
   }
 
-  const urls = urlsForUser(user)
+  const urls = urlsForUser(user.id)
+  console.log(urls)
 
   const templateVars = {
     urls,
