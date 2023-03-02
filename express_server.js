@@ -1,5 +1,5 @@
 const express = require("express");
-const getUserByEmail = require('./helpers')
+const getUserByEmail = require('./helpers');
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 
@@ -34,12 +34,6 @@ const users = {
   },
 };
 
-// Database object
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -56,7 +50,6 @@ const urlDatabase = {
 ///////// FUNCTIONS
 // *************************
 
-
 function generateRandomString() {
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -65,32 +58,21 @@ function generateRandomString() {
   for (let i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-
   return result;
 }
-
-// const getUserByEmail = function(email) {
-//   const userValues = Object.values(users);
-//   for(const user of userValues) {
-//     if(user.email === email) {
-//       return user;
-//     }
-//   }
-// };
-
 
 const urlsForUser = function(userId) {
   const urls = {};
   const ids = Object.keys(urlDatabase);
 
   for (const id of ids) {
-    const url = urlDatabase[id]
-    if(url.userID === userId) {
+    const url = urlDatabase[id];
+    if (url.userID === userId) {
       urls[id] = url;
     }
   }
   return urls;
-}
+};
 
 
 // *************************
@@ -99,20 +81,20 @@ const urlsForUser = function(userId) {
 
 // Route: Homepage
 app.get("/", (req, res) => {
-  res.send(`Welcome to TinyApp. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
+  res.send(`Welcome to TinyApp. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
 });
 
 // Route: get register
 app.get('/register', (req, res) => {
   const templateVars = {
     user: users[req.session['user_id']]
-  }
+  };
 
   const userId = req.session.user_id;
   const user = users[userId];
 
   // if user is logged in and tries going to the register page, redirect them to urls
-  if(user) {
+  if (user) {
     return res.redirect('/urls');
   }
 
@@ -127,21 +109,21 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   if (email === "" || password === "") {
-    return res.status(400).send("Please enter your email and a password")
+    return res.status(400).send("Please enter your email and a password");
   }
 
-  if(getUserByEmail(email, users)) {
-    return res.status(400).send("This email is already registered")
+  if (getUserByEmail(email, users)) {
+    return res.status(400).send("This email is already registered");
   }
 
-    // add the new user & info to the global users object
-    users[userId] = {
-      id: userId,
-      email: email,
-      password: bcrypt.hashSync(password, 10)
-    }
+  // add the new user & info to the global users object
+  users[userId] = {
+    id: userId,
+    email: email,
+    password: bcrypt.hashSync(password, 10)
+  };
 
-    console.log(users)
+  console.log(users);
 
   // res.cookie('user_id', userId);
   req.session.user_id = userId;
@@ -156,7 +138,7 @@ app.get("/login", (req, res) => {
   const user = users[userId];
 
   // if user is logged in and tries going to the login page, redirect them to urls
-  if(user) {
+  if (user) {
     return res.redirect('/urls');
   }
 
@@ -170,12 +152,12 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const user = getUserByEmail(email, users);
 
-  if(!user) {
-    return res.status(403).send("This email was not found. Please try signing in again or register instead.")
+  if (!user) {
+    return res.status(403).send("This email was not found. Please try signing in again or register instead.");
   }
   // if(password !== user.password)
   if (!bcrypt.compareSync(password, user.password)) {
-    return res.status(403).send("Incorrect password. Please try again")
+    return res.status(403).send("Incorrect password. Please try again");
   }
 
   // res.cookie('user_id', user.id);
@@ -198,8 +180,8 @@ app.get("/urls/new", (req, res) => {
     user: users[req.session['user_id']]
   };
 
-  if(!templateVars.user) {
-    return res.redirect('/login')
+  if (!templateVars.user) {
+    return res.redirect('/login');
   }
 
   res.render("urls_new", templateVars);
@@ -214,8 +196,8 @@ app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  if(!user) {
-    return res.status(403).send("You must be logged in to view this page")
+  if (!user) {
+    return res.status(403).send("You must be logged in to view this page");
   }
 
   // On post, generate a random string
@@ -251,8 +233,8 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
   const id = req.params.id;
-  if(!user) {
-    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
+  if (!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
 
   if (!urlDatabase[id]) {
@@ -276,13 +258,13 @@ app.post("/urls/:id/delete", (req, res) => {
   const user = users[req.session['user_id']];
   const id = req.params.id;
 
-  if(!user) {
+  if (!user) {
     return res.status(403).send(`You must be logged in to delete this url. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
 
-    if (urlDatabase[id].userID !== user.id) {
-      return res.status(403).send("You do not have permission to delete a URL that is not yours.");
-    }
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(403).send("You do not have permission to delete a URL that is not yours.");
+  }
 
   if (!urlDatabase[req.params.id]) {
     return res.status(404).send("Invalid tinyURL, please try again.");
@@ -316,12 +298,12 @@ app.post("/urls/:id", (req, res) => {
 // Route: urls
 app.get("/urls", (req, res) => {
   const user = users[req.session['user_id']];
-  if(!user) {
-    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`)
+  if (!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
 
-  const urls = urlsForUser(user.id)
-  console.log(urls)
+  const urls = urlsForUser(user.id);
+  console.log(urls);
 
   const templateVars = {
     urls,

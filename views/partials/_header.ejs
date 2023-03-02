@@ -19,40 +19,27 @@
       </div>
     </div>
 
-
-
-
-  <!--
-  - Conditional to check if the user is logged in or not
-  - if logged in ? display username and logout button : display login form and signin button -->
-  <% if(user){ %>
-    <!-- Display the username -->
-    <div>
-      <p style="padding-right: 15px">Signed in as: <%= user["email"] %></p>
-    </div>
-
-    <!-- Logout button -->
-    <form action="/logout" method="POST" >
-
-      <div style="display: flex; justify-content: center; align-items: center;">
-        <label for="username"> </label>
-        <button type="submit" class="btn btn-primary"> Logout</button>
+    <!-- if user logged in ? display username and logout button : display login form and signin button -->
+    <% if(user){ %>
+      <!-- Display the username -->
+      <div>
+        <p style="padding-right: 15px">Signed in as: <%= user["email"] %></p>
       </div>
-    </form>
 
-  <% } else{ %>
+      <!-- Logout button -->
+      <form action="/logout" method="POST" >
 
-    <a href="/login" class="btn btn-primary" style="margin-right: 10px">Login</a>
-    <a href="/register" class="btn btn-primary";">Register</a>
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <label for="username"> </label>
+          <button type="submit" class="btn btn-primary"> Logout</button>
+        </div>
+      </form>
 
-  <% } %>
+    <% } else{ %>
 
+      <a href="/login" class="btn btn-primary" style="margin-right: 10px">Login</a>
+      <a href="/register" class="btn btn-primary";">Register</a>
 
-
-
-
-
-</nav>
-
-
+    <% } %>
+  </nav>
 </header>
