@@ -1,5 +1,5 @@
 const express = require("express");
-// const { getUserByEmail } = require('./helpers')
+const getUserByEmail = require('./helpers')
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 
@@ -69,14 +69,14 @@ function generateRandomString() {
   return result;
 }
 
-const getUserByEmail = function(email) {
-  const userValues = Object.values(users);
-  for(const user of userValues) {
-    if(user.email === email) {
-      return user;
-    }
-  }
-};
+// const getUserByEmail = function(email) {
+//   const userValues = Object.values(users);
+//   for(const user of userValues) {
+//     if(user.email === email) {
+//       return user;
+//     }
+//   }
+// };
 
 
 const urlsForUser = function(userId) {
@@ -130,7 +130,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Please enter your email and a password")
   }
 
-  if(getUserByEmail(email)) {
+  if(getUserByEmail(email, users)) {
     return res.status(400).send("This email is already registered")
   }
 
@@ -149,8 +149,7 @@ app.post("/register", (req, res) => {
 });
 
 // Route:  get login
-// user types a username in form (_header.ejs), hits submit.
-// A cookie is create with their login name and value. Once logged in, user is redirected to /urls
+// creates cookie and redirects user to /urls
 app.get("/login", (req, res) => {
 
   const userId = req.session.user_id;
@@ -169,7 +168,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if(!user) {
     return res.status(403).send("This email was not found. Please try signing in again or register instead.")
@@ -207,9 +206,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 // Route: post submitted url
-// after user submits the website, a short url is generated
-// user is then redirected to urls/tinyurl to see their newly generate tiny url and corresponding long url
-// (uses longURL / submit button from urls_new ejs)
+// user submits a longURL, short url is generated
+// user redirected to urls/tinyurl to see the short&long URLS
+// (longURL / submit button from urls_new ejs)
 app.post("/urls", (req, res) => {
 
   const userId = req.session.user_id;
@@ -233,7 +232,7 @@ app.post("/urls", (req, res) => {
 });
 
 // Route: short url id
-// use a tiny url id and redirects user to the real website
+// use tiny url id, redirect user to longURL site
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL].longURL;
@@ -248,7 +247,7 @@ app.get("/u/:id", (req, res) => {
 
 // Route: urls/id
 // page after the user creates a tiny url
-// user can view the short and long url & edit to the long url
+// user can view short&long url, and edit long url
 app.get("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
   const id = req.params.id;
