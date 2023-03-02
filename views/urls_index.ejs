@@ -39,10 +39,7 @@
 
 
               <td>
-                <!--
-                  - route /urls
-                  - Edit button. User can click this button to be redirected to a page that lets them edit the long url
-                  - once submitted, user it directed to urls/id to edit the longurl -->
+                <!-- Edit button.-->
                 <form method="GET" action="/urls/<%= id %>">
                 <button
                   type="submit"
@@ -52,10 +49,7 @@
               </td>
 
               <td>
-                <!--
-                  - route /urls
-                  - Delete button. Deletes the entire row in the table - short, long, edit, and delete all removed for that row
-                  - once submitted, user is redirected to /urls to see the updated page with deleted row -->
+                <!-- Delete button. -->
                 <form method="POST" action="/urls/<%= id %>/delete">
                   <button
                     type="submit"
