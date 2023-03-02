@@ -81,7 +81,7 @@ const urlsForUser = function(userId) {
 
 // Route: Homepage
 app.get("/", (req, res) => {
-  res.send(`Welcome to TinyApp. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  res.redirect('/login')
 });
 
 // Route: get register
@@ -99,6 +99,92 @@ app.get('/register', (req, res) => {
   }
 
   res.render('register', templateVars);
+});
+
+// Route:  get login
+// creates cookie and redirects user to /urls
+app.get("/login", (req, res) => {
+
+  const userId = req.session.user_id;
+  const user = users[userId];
+
+  // if user is logged in and tries going to the login page, redirect them to urls
+  if (user) {
+    return res.redirect('/urls');
+  }
+
+  res.render('login', {user: null});
+});
+
+// Route: submit url
+// a form (from urls_new ejs). user types a website and hits submit
+app.get("/urls/new", (req, res) => {
+  const templateVars = {
+    user: users[req.session['user_id']]
+  };
+
+  if (!templateVars.user) {
+    return res.redirect('/login');
+  }
+
+  res.render("urls_new", templateVars);
+});
+
+// Route: short url id
+// use tiny url id, redirect user to longURL site
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL].longURL;
+
+  if (!longURL) {
+    res.status(404).send("That shortened URL does not exist. Please try again.");
+  } else {
+    res.redirect(longURL);
+  }
+});
+
+// Route: urls/id
+// page after the user creates a tiny url
+// user can view short&long url, and edit long url
+app.get("/urls/:id", (req, res) => {
+  const user = users[req.session['user_id']];
+  const id = req.params.id;
+  if (!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Invalid tinyURL, please try again. ");
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(403).send("You do not have permission to view this URL.");
+  }
+
+  const templateVars = {
+    user: user,
+    id: id,
+    longURL: urlDatabase[req.params.id].longURL
+  };
+  res.render("urls_show", templateVars);
+});
+
+// Route: urls
+app.get("/urls", (req, res) => {
+  const user = users[req.session['user_id']];
+  if (!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  const urls = urlsForUser(user.id);
+  console.log(urls);
+
+  const templateVars = {
+    urls,
+    user
+  };
+
+  res.render("urls_index", templateVars);
 });
 
 // Route: post register
@@ -130,22 +216,6 @@ app.post("/register", (req, res) => {
   res.redirect('/urls');
 });
 
-// Route:  get login
-// creates cookie and redirects user to /urls
-app.get("/login", (req, res) => {
-
-  const userId = req.session.user_id;
-  const user = users[userId];
-
-  // if user is logged in and tries going to the login page, redirect them to urls
-  if (user) {
-    return res.redirect('/urls');
-  }
-
-  res.render('login', {user: null});
-});
-
-
 // Route: post login
 app.post("/login", (req, res) => {
   const email = req.body.email;
@@ -165,26 +235,10 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');
 });
 
-
 // Route: post logout
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/login');
-});
-
-
-// Route: submit url
-// a form (from urls_new ejs). user types a website and hits submit
-app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    user: users[req.session['user_id']]
-  };
-
-  if (!templateVars.user) {
-    return res.redirect('/login');
-  }
-
-  res.render("urls_new", templateVars);
 });
 
 // Route: post submitted url
@@ -213,44 +267,23 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
-// Route: short url id
-// use tiny url id, redirect user to longURL site
-app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
-
-  if (!longURL) {
-    res.status(404).send("That shortened URL does not exist. Please try again.");
-  } else {
-    res.redirect(longURL);
-  }
-});
-
-
-// Route: urls/id
-// page after the user creates a tiny url
-// user can view short&long url, and edit long url
-app.get("/urls/:id", (req, res) => {
+// Route: edit longurl
+//takes the longurl the user submit and replaces the original url (form in urls_show ejs)
+app.post("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
-  const id = req.params.id;
-  if (!user) {
-    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  const shortID = req.params.id;
+  const longURL = req.body.editURL;
+
+
+  if (urlDatabase[shortID].userID === user.id) {
+    urlDatabase[shortID].longURL = longURL;
+    res.redirect('/urls');
+  } else {
+    // Return an error message if the user does not own the URL
+    res.status(403).send("You do not have permission to edit this URL.");
   }
 
-  if (!urlDatabase[id]) {
-    return res.status(404).send("Invalid tinyURL, please try again. ");
-  }
-
-  if (urlDatabase[id].userID !== user.id) {
-    return res.status(403).send("You do not have permission to view this URL.");
-  }
-
-  const templateVars = {
-    user: user,
-    id: id,
-    longURL: urlDatabase[req.params.id].longURL
-  };
-  res.render("urls_show", templateVars);
+  res.redirect('/urls');
 });
 
 // Route: delete row (button in urls_index)
@@ -273,44 +306,6 @@ app.post("/urls/:id/delete", (req, res) => {
 
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
-});
-
-// Route: edit longurl
-//takes the longurl the user submit and replaces the original url (form in urls_show ejs)
-app.post("/urls/:id", (req, res) => {
-  const user = users[req.session['user_id']];
-  const shortID = req.params.id;
-  const longURL = req.body.editURL;
-
-
-  if (urlDatabase[shortID].userID === user.id) {
-    urlDatabase[shortID].longURL = longURL;
-    res.redirect('/urls');
-  } else {
-    // Return an error message if the user does not own the URL
-    res.status(403).send("You do not have permission to edit this URL.");
-  }
-
-  res.redirect('/urls');
-});
-
-
-// Route: urls
-app.get("/urls", (req, res) => {
-  const user = users[req.session['user_id']];
-  if (!user) {
-    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
-  }
-
-  const urls = urlsForUser(user.id);
-  console.log(urls);
-
-  const templateVars = {
-    urls,
-    user
-  };
-
-  res.render("urls_index", templateVars);
 });
 
 
