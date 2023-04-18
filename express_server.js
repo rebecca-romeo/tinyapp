@@ -49,10 +49,16 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 // ---- POST ROUTES -----
 app.post("/urls", (req, res) => {
-  console.log("req body", req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  shortUrl = generateRandomString();
+  console.log(shortUrl)
+  urlDatabase[shortUrl] = req.body.longURL;
+  console.log("updated db", urlDatabase)
+  console.log("req body", req.body);
+
+  res.redirect(`/urls/${shortUrl}`);
 });
 
 app.listen(PORT, () => {
