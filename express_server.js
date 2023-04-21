@@ -24,6 +24,14 @@ const generateRandomString = () => {
 };
 
 
+const getUserByEmail = function(email, users) {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      return user;
+    }
+  }
+};
 
 // ---- DATABASES -----
 const urlDatabase = {
@@ -112,10 +120,25 @@ app.post('/urls/:id', (req, res) => {
 
 app.post("/register", (req, res) => {
   const userId = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (email === "" || password === "") {
+    // console.log("all users", users);
+    return res.status(400).send("Please enter your email and a password");
+  }
+
+  if (getUserByEmail(email, users)) {
+    return res.status(400).send("This email is already registered");
+  }
+
+
+
+
   users[userId] = {
     id: userId,
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
   };
   console.log("all users", users);
   res.cookie('user_id', userId);
