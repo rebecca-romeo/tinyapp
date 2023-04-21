@@ -1,12 +1,12 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -21,7 +21,7 @@ const generateRandomString = () => {
   // console.log(characters.charAt(0))
   // console.log(result)
   return result;
-}
+};
 
 
 
@@ -38,13 +38,13 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const username = req.cookies["username"];
   const templateVars = { urls: urlDatabase, username };
-  console.log("temp vars:", templateVars)
+  console.log("temp vars:", templateVars);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const username = req.cookies["username"];
-  const templateVars = { username }
+  const templateVars = { username };
   res.render("urls_new", templateVars);
 });
 
@@ -65,17 +65,17 @@ app.get("/u/:id", (req, res) => {
 
 app.get("/register", (req, res) => {
   const username = req.cookies["username"];
-  const templateVars = { username }
-  res.render('register', templateVars)
-})
+  const templateVars = { username };
+  res.render('register', templateVars);
+});
 
 
 // ---- POST ROUTES -----
 app.post("/urls", (req, res) => {
-  shortUrl = generateRandomString();
-  console.log(shortUrl)
+  const shortUrl = generateRandomString();
+  console.log(shortUrl);
   urlDatabase[shortUrl] = req.body.longURL;
-  console.log("updated db", urlDatabase)
+  console.log("updated db", urlDatabase);
   console.log("req body", req.body);
 
   res.redirect(`/urls/${shortUrl}`);
@@ -83,25 +83,25 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.editURL;
-  res.redirect(`/urls/${id}`)
-})
+  res.redirect(`/urls/${id}`);
+});
 
 app.post("/login", (req, res) => {
-  console.log("res body in login", req.body.username)
-  res.cookie('username', req.body.username)
-  res.redirect('/urls')
-})
+  console.log("res body in login", req.body.username);
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie('username', req.body.username);
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
