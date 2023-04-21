@@ -19,12 +19,12 @@
       </div>
     </div>
 
-    <% if(username) { %>
+    <% if(user) { %>
       <!-- If user's logged in:
         - display username
         - display logout button
       -->
-      <p>Logged in as: <%= username %></p>
+      <p>Logged in as: <%= user.email %></p>
       <form action="/logout" method="POST" >
           <label for="username"> </label>
           <button type="submit" class="btn btn-primary"> Logout</button>
