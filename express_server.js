@@ -95,6 +95,12 @@ app.get("/register", (req, res) => {
   res.render('register', templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const user = users[req.cookies['user_id']];
+  const templateVars = { user };
+  res.render('login', templateVars);
+});
+
 
 // ---- POST ROUTES -----
 app.post("/urls", (req, res) => {
@@ -131,8 +137,6 @@ app.post("/register", (req, res) => {
   if (getUserByEmail(email, users)) {
     return res.status(400).send("This email is already registered");
   }
-
-
 
 
   users[userId] = {
