@@ -8,7 +8,7 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+    <title>Show Url - TinyApp</title>
   </head>
 
   <body>
@@ -16,11 +16,14 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
+
+        <!-- Display short & long urls -->
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
-        <!-- Update/change the longURL -->
+
+        <!-- Form to update the longURL -->
         <form action="/urls/<%= id %>" method="POST" >
           <label for="editURL">New URL:</label>
             <input
@@ -33,6 +36,7 @@
       </div>
       <div class="card-footer text-muted"></div>
     </div>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
