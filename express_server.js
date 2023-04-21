@@ -91,12 +91,22 @@ app.get("/u/:id", (req, res) => {
 app.get("/register", (req, res) => {
   // *** const username = req.cookies["username"];
   const user = users[req.cookies['user_id']];
+
+  if (user) {
+    res.redirect('/urls')
+  }
+
   const templateVars = { user };
   res.render('register', templateVars);
 });
 
 app.get("/login", (req, res) => {
   const user = users[req.cookies['user_id']];
+
+  if (user) {
+    res.redirect('/urls')
+  }
+
   const templateVars = { user };
   res.render('login', templateVars);
 });
