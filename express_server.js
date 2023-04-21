@@ -58,7 +58,7 @@ app.get("/urls", (req, res) => {
 
   // If user is not logged in, redirect to login
   if (!user) {
-    res.redirect("/login");
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
 
   res.render("urls_index", templateVars);
