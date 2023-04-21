@@ -30,6 +30,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 // ---- GET ROUTES -----
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -90,6 +104,19 @@ app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.editURL;
   res.redirect(`/urls/${id}`);
+});
+
+app.post("/register", (req, res) => {
+  const userId = generateRandomString();
+  users[userId] = {
+    id: userId,
+    email: req.body.email,
+    password: req.body.password
+  };
+  console.log("all users", users);
+  res.cookie('user_id', userId);
+  res.redirect('/urls');
+
 });
 
 app.post("/login", (req, res) => {
