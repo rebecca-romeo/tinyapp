@@ -169,6 +169,22 @@ app.post("/urls", (req, res) => {
 
 // POST /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
+  const user = users[req.session['user_id']];
+  const id = req.params.id;
+
+  if (!user) {
+    return res.status(403).send(`You must be logged in to delete this url. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(403).send("You do not have permission to delete a URL that is not yours.");
+  }
+
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send("Invalid tinyURL, please try again.");
+  }
+
+
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
