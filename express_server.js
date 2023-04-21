@@ -60,6 +60,11 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   // **** const username = req.cookies["username"];
   const user = users[req.cookies['user_id']];
+
+  if (!user) {
+    res.redirect("/login")
+  }
+
   const templateVars = { urls: urlDatabase, user };
   console.log("temp vars:", templateVars);
   res.render("urls_index", templateVars);
@@ -89,6 +94,11 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
+
+  if (!longURL) {
+    res.status(404).send("That shortened URL does not exist. Please try again.");
+  }
+
   res.redirect(longURL);
 });
 
