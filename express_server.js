@@ -124,6 +124,28 @@ app.post('/urls/:id', (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+app.post("/login", (req, res) => {
+  // console.log("res body in login", req.body.username);
+  // **** res.cookie('username', req.body.username);
+  // const user = users[req.cookies['user_id']];
+  // res.cookie('user', users['user_id'])
+
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = getUserByEmail(email, users);
+
+  if (!user) {
+    return res.status(403).send("This email was not found. Please try signing in again or register instead.");
+  }
+
+  if (password !== user.password) {
+    return res.status(403).send("Incorrect password. Please try again");
+  }
+
+  res.cookie('user_id', user.id);
+  res.redirect('/urls');
+});
+
 app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const email = req.body.email;
@@ -138,7 +160,6 @@ app.post("/register", (req, res) => {
     return res.status(400).send("This email is already registered");
   }
 
-
   users[userId] = {
     id: userId,
     email,
@@ -150,19 +171,11 @@ app.post("/register", (req, res) => {
 
 });
 
-app.post("/login", (req, res) => {
-  // console.log("res body in login", req.body.username);
-  // **** res.cookie('username', req.body.username);
-  // const user = users[req.cookies['user_id']];
-  // res.cookie('user', users['user_id'])
-  res.cookie('user_id', users['user_id']);
-  res.redirect('/urls');
-});
 
 app.post("/logout", (req, res) => {
   // **** res.clearCookie('username', req.body.username);
   res.clearCookie('user_id', users['user_id']);
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.listen(PORT, () => {
