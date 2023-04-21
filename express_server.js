@@ -21,26 +21,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 
-// ---- DATABASES -----
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
-// const users = {
-//   userRandomID: {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "$2a$10$u7cqKkuIqOjenKJCX5XSHOLMyQRArqCXk.Zkt1Bti4ht13e2p97wG"
-//   },
-//   user2RandomID: {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "$2a$10$oNYgh7N8X92224imwO5iAOaz776q3FtjPgaq.9s6/xp23voNxPwNC"
-//   },
-// };
-
-
 // ---- GET ROUTES -----
 // Homepage
 app.get("/", (req, res) => {
@@ -55,7 +35,7 @@ app.get("/", (req, res) => {
 // GET /urls
 app.get("/urls", (req, res) => {
   const user = users[req.session['user_id']];
-  console.log("check user", user)
+  console.log("check user", user);
 
 
 
@@ -66,7 +46,7 @@ app.get("/urls", (req, res) => {
 
 
   const userUrls = urlsForUser(user.id);
-  console.log('check all urls', userUrls)
+  console.log('check all urls', userUrls);
 
   const templateVars = {
     urls: userUrls,
@@ -149,20 +129,17 @@ app.get("/login", (req, res) => {
 // POST /urls
 app.post("/urls", (req, res) => {
   const user = users[req.session['user_id']];
-  console.log('line 149 user', user)
+
   if (!user) {
     return res.status(403).send("You must be logged in to view this page");
   }
 
   const shortUrl = generateRandomString();
-  console.log(shortUrl);
+
   urlDatabase[shortUrl] = {
     userID: user.id,
     longURL: req.body.longURL
-  }
-  // urlDatabase[shortUrl] = req.body.longURL;
-  console.log("updated db", urlDatabase);
-  console.log("req body", req.body);
+  };
 
   res.redirect(`/urls/${shortUrl}`);
 });
@@ -192,7 +169,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST /urls/:id
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
-  urlDatabase[id] = req.body.editURL;
+  urlDatabase[id].longURL = req.body.editURL;
   res.redirect(`/urls/${id}`);
 });
 
@@ -225,7 +202,6 @@ app.post("/register", (req, res) => {
 
   // Empty email or pw submission on register form
   if (email === "" || pw === "") {
-    // console.log("all users", users);
     return res.status(400).send("Please enter your email and a password");
   }
 
@@ -241,7 +217,6 @@ app.post("/register", (req, res) => {
     password
   };
 
-  console.log("all users", users);
   req.session.user_id = userId;
   res.redirect('/urls');
 

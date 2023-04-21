@@ -1,4 +1,4 @@
-const { users, urlDatabase } = require('./database');
+const { urlDatabase } = require('./database');
 
 // ---- FUNCTIONS -----
 
@@ -27,30 +27,14 @@ const urlsForUser = function(id) {
   let userUrls = {};
 
   for (let shortUrl in urlDatabase) {
-    console.log('check shorturl 30', shortUrl)
-    console.log('check db 31', urlDatabase)
     if (urlDatabase[shortUrl].userID === id) {
       userUrls[shortUrl] = urlDatabase[shortUrl];
-      // userUrls.longUrl = urlDatabase[shortUrl].longUrl
     }
   }
 
-  console.log('check userurls', userUrls)
+  console.log('check userurls', userUrls);
   return userUrls;
 };
-
-// const urlsForUser = function(userId) {
-//   const urls = {};
-//   const ids = Object.keys(urlDatabase);
-
-//   for (const id of ids) {
-//     const url = urlDatabase[id];
-//     if (url.userID === userId) {
-//       urls[id] = url;
-//     }
-//   }
-//   return urls;
-// };
 
 module.exports = {
   generateRandomString,
