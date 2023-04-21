@@ -1,5 +1,6 @@
 const express = require("express");
-const { getUserByEmail, generateRandomString } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+const { users, urlDatabase } = require('./database');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
@@ -18,26 +19,6 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
-
-
-// ---- DATABASES -----
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "$2a$10$u7cqKkuIqOjenKJCX5XSHOLMyQRArqCXk.Zkt1Bti4ht13e2p97wG"
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "$2a$10$oNYgh7N8X92224imwO5iAOaz776q3FtjPgaq.9s6/xp23voNxPwNC"
-  },
-};
 
 
 // ---- GET ROUTES -----
@@ -80,10 +61,25 @@ app.get("/urls/new", (req, res) => {
 // GET /urls/:id
 app.get("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
+  const id = req.params.id;
+
+  if (!user) {
+    return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Invalid tinyURL, please try again. ");
+  }
+
+  // if (urlDatabase[id].userID !== user) {
+  //   return res.status(403).send("You do not have permission to view this URL.");
+  // }
+
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    user };
+    user,
+    id,
+    longURL: urlDatabase[req.params.id].longURL
+  };
 
   res.render("urls_show", templateVars);
 });
@@ -91,12 +87,13 @@ app.get("/urls/:id", (req, res) => {
 // GET /u/:id
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
-
-  // If url not found, show err msg
-  if (!longURL) {
-    res.status(404).send("That shortened URL does not exist. Please try again.");
+    // If url not found, show err msg
+  if (!urlDatabase[id]) {
+      res.status(404).send("That shortened URL does not exist. Please try again.");
   }
+
+  const longURL = urlDatabase[id].longURL;
+
 
   res.redirect(longURL);
 });
@@ -133,22 +130,41 @@ app.get("/login", (req, res) => {
 // ---- POST ROUTES -----
 // POST /urls
 app.post("/urls", (req, res) => {
-  const user = users[req.session['user_id']];
+  const userId = req.session['user_id'];
+  const user = users[userId]
+
   if (!user) {
     return res.status(403).send("You must be logged in to view this page");
   }
 
   const shortUrl = generateRandomString();
-  console.log(shortUrl);
-  urlDatabase[shortUrl] = req.body.longURL;
-  console.log("updated db", urlDatabase);
-  console.log("req body", req.body);
+
+  urlDatabase[shortUrl] = {
+    longURL: req.body.longURL,
+    userId
+  }
 
   res.redirect(`/urls/${shortUrl}`);
 });
 
 // POST /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
+  const user = users[req.session['user_id']];
+  const id = req.params.id;
+
+  if (!user) {
+    return res.status(403).send(`You must be logged in to delete this url. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  // if (urlDatabase[id].userID !== user.id) {
+  //   return res.status(403).send("You do not have permission to delete a URL that is not yours.");
+  // }
+
+  if (!urlDatabase[req.params.id]) {
+    return res.status(404).send("Invalid tinyURL, please try again.");
+  }
+
+
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
@@ -156,7 +172,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST /urls/:id
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
-  urlDatabase[id] = req.body.editURL;
+  urlDatabase[id]["longURL"] = req.body.editURL;
   res.redirect(`/urls/${id}`);
 });
 
