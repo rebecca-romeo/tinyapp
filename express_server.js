@@ -68,6 +68,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   // **** const username = req.cookies["username"];
   const user = users[req.cookies['user_id']];
+
+  if (!user) {
+    res.redirect("/login")
+  }
   const templateVars = { user };
   res.render("urls_new", templateVars);
 });
@@ -114,6 +118,11 @@ app.get("/login", (req, res) => {
 
 // ---- POST ROUTES -----
 app.post("/urls", (req, res) => {
+  const user = users[req.cookies['user_id']];
+  if (!user) {
+    return res.status(403).send("You must be logged in to view this page");
+  }
+
   const shortUrl = generateRandomString();
   console.log(shortUrl);
   urlDatabase[shortUrl] = req.body.longURL;
@@ -135,11 +144,6 @@ app.post('/urls/:id', (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // console.log("res body in login", req.body.username);
-  // **** res.cookie('username', req.body.username);
-  // const user = users[req.cookies['user_id']];
-  // res.cookie('user', users['user_id'])
-
   const email = req.body.email;
   const password = req.body.password;
   const user = getUserByEmail(email, users);
