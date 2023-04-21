@@ -1,5 +1,6 @@
 const express = require("express");
-const { getUserByEmail, generateRandomString } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+const { users, urlDatabase } = require('./database');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
@@ -21,23 +22,23 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // ---- DATABASES -----
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "$2a$10$u7cqKkuIqOjenKJCX5XSHOLMyQRArqCXk.Zkt1Bti4ht13e2p97wG"
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "$2a$10$oNYgh7N8X92224imwO5iAOaz776q3FtjPgaq.9s6/xp23voNxPwNC"
-  },
-};
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "$2a$10$u7cqKkuIqOjenKJCX5XSHOLMyQRArqCXk.Zkt1Bti4ht13e2p97wG"
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "$2a$10$oNYgh7N8X92224imwO5iAOaz776q3FtjPgaq.9s6/xp23voNxPwNC"
+//   },
+// };
 
 
 // ---- GET ROUTES -----
@@ -54,12 +55,24 @@ app.get("/", (req, res) => {
 // GET /urls
 app.get("/urls", (req, res) => {
   const user = users[req.session['user_id']];
-  const templateVars = { urls: urlDatabase, user };
+  console.log("check user", user)
+
+
 
   // If user is not logged in, redirect to login
   if (!user) {
     return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
+
+
+  const userUrls = urlsForUser(user.id);
+  console.log('check all urls', userUrls)
+
+  const templateVars = {
+    urls: userUrls,
+    user
+  };
+
 
   res.render("urls_index", templateVars);
 });
@@ -80,10 +93,12 @@ app.get("/urls/new", (req, res) => {
 // GET /urls/:id
 app.get("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
+  const id = req.params.id;
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    user };
+    user,
+    id,
+    longURL: urlDatabase[id].longURL
+  };
 
   res.render("urls_show", templateVars);
 });
@@ -134,13 +149,18 @@ app.get("/login", (req, res) => {
 // POST /urls
 app.post("/urls", (req, res) => {
   const user = users[req.session['user_id']];
+  console.log('line 149 user', user)
   if (!user) {
     return res.status(403).send("You must be logged in to view this page");
   }
 
   const shortUrl = generateRandomString();
   console.log(shortUrl);
-  urlDatabase[shortUrl] = req.body.longURL;
+  urlDatabase[shortUrl] = {
+    userID: user.id,
+    longURL: req.body.longURL
+  }
+  // urlDatabase[shortUrl] = req.body.longURL;
   console.log("updated db", urlDatabase);
   console.log("req body", req.body);
 
