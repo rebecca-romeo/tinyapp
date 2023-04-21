@@ -63,6 +63,12 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/register", (req, res) => {
+  const username = req.cookies["username"];
+  const templateVars = { username }
+  res.render('register', templateVars)
+})
+
 
 // ---- POST ROUTES -----
 app.post("/urls", (req, res) => {
