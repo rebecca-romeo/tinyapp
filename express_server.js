@@ -1,4 +1,5 @@
 const express = require("express");
+const { getUserByEmail, generateRandomString } = require('./helpers');
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 
@@ -18,29 +19,6 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 
-
-// ---- FUNCTIONS -----
-const generateRandomString = () => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  // console.log(characters.charAt(0))
-  // console.log(result)
-  return result;
-};
-
-
-const getUserByEmail = function(email, users) {
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
-    }
-  }
-};
 
 // ---- DATABASES -----
 const urlDatabase = {
@@ -184,7 +162,7 @@ app.post("/register", (req, res) => {
   const pw = req.body.password;
   const password = bcrypt.hashSync(pw, 10);
 
-  if (email === "" || password === "") {
+  if (email === "" || pw === "") {
     // console.log("all users", users);
     return res.status(400).send("Please enter your email and a password");
   }
