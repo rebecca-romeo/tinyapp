@@ -32,7 +32,6 @@ const urlsForUser = function(id) {
     }
   }
 
-  console.log('check userurls', userUrls);
   return userUrls;
 };
 
