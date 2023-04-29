@@ -20,7 +20,6 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 
-
 // ---- GET ROUTES -----
 // Homepage
 app.get("/", (req, res) => {
@@ -46,7 +45,6 @@ app.get("/register", (req, res) => {
 
   res.render('register', templateVars);
 });
-
 
 // GET login
 // Login form
@@ -77,7 +75,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-
 // GET /u/:id
 // use tiny url id, redirect user to longURL site
 app.get("/u/:id", (req, res) => {
@@ -89,8 +86,6 @@ app.get("/u/:id", (req, res) => {
   } else {
     res.redirect(urlDatabase[id].longURL);
   }
-
-
 });
 
 // GET /urls/:id
@@ -121,7 +116,6 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
 // GET /urls
 // Displays all shortURLS, longURLS, edit, and delete buttons.
 app.get("/urls", (req, res) => {
@@ -133,7 +127,6 @@ app.get("/urls", (req, res) => {
     return res.status(403).send(`You must be logged in to view this page. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
   }
 
-
   const userUrls = urlsForUser(user.id);
   // console.log('check all urls', userUrls);
 
@@ -142,11 +135,8 @@ app.get("/urls", (req, res) => {
     user
   };
 
-
   res.render("urls_index", templateVars);
 });
-
-
 
 // ---- POST ROUTES -----
 // POST register
@@ -199,14 +189,12 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');
 });
 
-
 // POST /logout
 app.post("/logout", (req, res) => {
   // clear the user cookie
   req.session = null;
   res.redirect('/login');
 });
-
 
 // POST /urls
 // user submits a longURL, short url is generated
@@ -248,7 +236,6 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.status(404).send("Invalid tinyURL, please try again.");
   }
 
-
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
@@ -258,16 +245,6 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
   const id = req.params.id;
-
-
-// check if url belongs to user
-  // if (urlDatabase[shortID].userID === user.id) {
-  //   urlDatabase[shortID].longURL = longURL;
-  //   return res.redirect('/urls');
-  // } else {
-  //   // Return an error message if the user does not own the URL
-  //   return res.status(403).send("You do not have permission to edit this URL.");
-  // }
 
   if (!urlDatabase[id]) {
     return res.status(404).send("Invalid tinyURL, please try again.");
