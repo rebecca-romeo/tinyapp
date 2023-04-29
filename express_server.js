@@ -24,12 +24,12 @@ app.use(express.urlencoded({ extended: true }));
 // ---- GET ROUTES -----
 // Homepage
 app.get("/", (req, res) => {
-  res.send(`Welcome to TinyApp!
+  const user = users[req.session['user_id']];
+  if (user) {
+    return res.redirect('/urls');
+  }
 
-  To create an account,
-  <a href="/register">Register here</a>.
-
-  If you have an account, <a href="/login">Login here</a>.`);
+  res.redirect('/login');
 });
 
 // GET register
@@ -82,14 +82,15 @@ app.get("/urls/new", (req, res) => {
 // use tiny url id, redirect user to longURL site
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
 
   // If url not found, show err msg
-  if (!longURL) {
+  if (!urlDatabase[id]) {
     res.status(404).send("That shortened URL does not exist. Please try again.");
+  } else {
+    res.redirect(urlDatabase[id].longURL);
   }
 
-  res.redirect(longURL);
+
 });
 
 // GET /urls/:id
@@ -110,8 +111,6 @@ app.get("/urls/:id", (req, res) => {
   if (urlDatabase[id].userID !== user.id) {
     return res.status(403).send("You do not have permission to view this URL.");
   }
-
-
 
   const templateVars = {
     user,
@@ -258,17 +257,33 @@ app.post("/urls/:id/delete", (req, res) => {
 //takes the longurl the user submit and replaces the original url (form in urls_show ejs)
 app.post("/urls/:id", (req, res) => {
   const user = users[req.session['user_id']];
-  const shortID = req.params.id;
-  const longURL = req.body.editURL;
+  const id = req.params.id;
+
 
 // check if url belongs to user
-  if (urlDatabase[shortID].userID === user.id) {
-    urlDatabase[shortID].longURL = longURL;
-    return res.redirect('/urls');
-  } else {
-    // Return an error message if the user does not own the URL
-    return res.status(403).send("You do not have permission to edit this URL.");
+  // if (urlDatabase[shortID].userID === user.id) {
+  //   urlDatabase[shortID].longURL = longURL;
+  //   return res.redirect('/urls');
+  // } else {
+  //   // Return an error message if the user does not own the URL
+  //   return res.status(403).send("You do not have permission to edit this URL.");
+  // }
+
+  if (!urlDatabase[id]) {
+    return res.status(404).send("Invalid tinyURL, please try again.");
   }
+
+  if (!user) {
+    return res.status(403).send(`You must be logged in to delete this url. Click <a href="/login"> here</a> to login, or register <a href="/register"> here</a> if you do not have an account.`);
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(403).send("You do not have permission to edit a URL that is not yours.");
+  }
+
+  urlDatabase[id].longURL = req.body.editURL;
+
+  res.redirect(`/urls/${id}`);
 });
 
 
